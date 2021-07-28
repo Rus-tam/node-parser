@@ -1,10 +1,9 @@
 const request = require('request');
 const cheerio = require('cheerio');
 
-const url = 'https://www.avito.ru/ufa/kvartiry/prodam-ASgBAgICAUSSA8YQ?cd=1';
 
 
-const getAdsUrl = (res) => {
+const getAdsInfo = (res) => {
     const baseUrl = 'https://www.avito.ru';
     let urls = [];
     let apartmentAdsUrl = [];
@@ -16,6 +15,8 @@ const getAdsUrl = (res) => {
     let districtName = [];
     let dates = [];
     let adInfo = [];
+    let apartmentInfo = [];
+
     let $ = cheerio.load(res.body);
 
     //Ссылка на конкретное объявление
@@ -55,6 +56,11 @@ const getAdsUrl = (res) => {
         dates.push($(elem).text());
     })
 
+    //Частное объявление или агенство
+    $('.iva-item-text-2xkfp').each((i, elem) => {
+        apartmentInfo.push($(elem).text());
+    })
+
     for (let i = 0; i < apartmentAdsUrl.length; i++) {
         adInfo.push({
             apartmentTitles: apartmentTitles[i],
@@ -62,6 +68,7 @@ const getAdsUrl = (res) => {
             prices: prices[i],
             streatName: streatName[i],
             districtName: districtName[i],
+            apartmentInfo: apartmentInfo[i],
             dates: dates[i]
         });
     };
@@ -69,20 +76,7 @@ const getAdsUrl = (res) => {
     return adInfo;
 }
 
-const getPage = async (url) => {
-
-    await request({url, headers: {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/92.0.4515.107 Safari/537.36'}}, (error, response) => {
-        if (error) {
-            throw error;
-        } else {
-            //console.log(response);
-            const result = getAdsUrl(response);
-            console.log(result);
-        }
-    })
-}
 
 
-getPage(url);
-
+module.exports = getAdsInfo;
 
